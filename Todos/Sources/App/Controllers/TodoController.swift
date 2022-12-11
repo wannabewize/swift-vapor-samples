@@ -18,13 +18,13 @@ struct TodoAddRequest: Content {
 class TodoController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let todos = routes.grouped("todos")
-        todos.get(use: sendTodos)
-        todos.post(use: addTodo)
-        todos.delete(":id", use: deleteTodo)
-        todos.patch(":id", use: toggleTodo)
+        todos.get(use: index)
+        todos.post(use: create)
+        todos.delete(":id", use: delete)
+        todos.patch(":id", use: toggleDone)
     }
     
-    func deleteTodo(req: Request) throws -> CommonResponse<Todo> {
+    func delete(req: Request) throws -> CommonResponse<Todo> {
         guard let id = req.parameters.get("id") else {
             throw Abort(.badRequest)
         }
@@ -36,7 +36,7 @@ class TodoController: RouteCollection {
         throw Abort(.notFound)
     }
     
-    func toggleTodo(req: Request) throws -> CommonResponse<Todo> {
+    func toggleDone(req: Request) throws -> CommonResponse<Todo> {
         guard let id = req.parameters.get("id") else {
             throw Abort(.badRequest)
         }
@@ -47,11 +47,11 @@ class TodoController: RouteCollection {
         throw Abort(.notFound)
     }
     
-    func sendTodos(req: Request) throws -> CommonResponse<[Todo]> {        
+    func index(req: Request) throws -> CommonResponse<[Todo]> {        
         return CommonResponse(data: TodoManager.shared.todos)
     }
     
-    func addTodo(req: Request) throws -> Todo {
+    func create(req: Request) throws -> Todo {
         do {
             let body = try req.content.decode(TodoAddRequest.self)
             let title = body.todo
