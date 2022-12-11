@@ -20,10 +20,35 @@ class TodoController: RouteCollection {
         let todos = routes.grouped("todos")
         todos.get(use: sendTodos)
         todos.post(use: addTodo)
+        todos.delete(":id", use: deleteTodo)
+        todos.patch(":id", use: toggleTodo)
     }
     
-    func sendTodos(req: Request) throws -> CommonResponse<[Todo]> {
-        return CommonResponse(data: todos)
+    func deleteTodo(req: Request) throws -> CommonResponse<Todo> {
+        guard let id = req.parameters.get("id") else {
+            throw Abort(.badRequest)
+        }
+        
+        if let deleted = TodoManager.shared.deleteTodo(id: id) {
+            return CommonResponse(data: deleted)
+        }
+        
+        throw Abort(.notFound)
+    }
+    
+    func toggleTodo(req: Request) throws -> CommonResponse<Todo> {
+        guard let id = req.parameters.get("id") else {
+            throw Abort(.badRequest)
+        }
+        
+        if let updated = TodoManager.shared.toggleTodo(id: id) {
+            return CommonResponse(data: updated)
+        }
+        throw Abort(.notFound)
+    }
+    
+    func sendTodos(req: Request) throws -> CommonResponse<[Todo]> {        
+        return CommonResponse(data: TodoManager.shared.todos)
     }
     
     func addTodo(req: Request) throws -> Todo {
@@ -31,7 +56,7 @@ class TodoController: RouteCollection {
             let body = try req.content.decode(TodoAddRequest.self)
             let title = body.todo
             let newTodo = Todo(title: title)
-            todos.append(newTodo)
+            TodoManager.shared.addTodo(newTodo)
             return newTodo
         }
         catch {
