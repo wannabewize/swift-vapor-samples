@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "StringTodos",
+    name: "Hello",
     platforms: [
        .macOS(.v12)
     ],

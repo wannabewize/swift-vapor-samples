@@ -19,7 +19,7 @@ x-shared_environment: &shared_environment
   
 services:
   app:
-    image: stringtodos:latest
+    image: hello:latest
     build:
       context: .
     environment:
